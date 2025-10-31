@@ -1,0 +1,39 @@
+{
+  "version": "2025-10-31",
+  "tech": [
+    {
+      "name": "WordPress",
+      "matchers": [
+        {"type":"html_regex","pattern":"wp-content|wp-includes|/wp-admin/"},
+        {"type":"meta_regex","pattern":"WordPress"},
+        {"type":"cookie_regex","pattern":"wordpress_logged_in"}
+      ],
+      "weight": 1.0
+    },
+    {
+      "name": "jQuery",
+      "matchers": [
+        {"type":"script_src_regex","pattern":"jquery(\\.min)?\\.js"},
+        {"type":"html_regex","pattern":"jQuery|\\$\\(document"}
+      ],
+      "weight": 0.6
+    },
+    {
+      "name": "Nginx",
+      "matchers": [
+        {"type":"header_regex","pattern":"Server:.*nginx"},
+        {"type":"header_regex","pattern":"X-Powered-By:.*nginx"}
+      ],
+      "weight": 0.7
+    },
+    {
+      "name": "Next.js",
+      "matchers": [
+        {"type":"html_regex","pattern":"__NEXT_DATA__"},
+        {"type":"script_src_regex","pattern":"/_next/static/"},
+        {"type":"global_js_regex","pattern":"__NEXT_DATA__"}
+      ],
+      "weight": 0.95
+    }
+  ]
+}
