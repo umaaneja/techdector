@@ -1,0 +1,15 @@
+techfinder/
+├─ fingerprints.json
+├─ requirements.txt
+├─ Dockerfile
+├─ README.md
+├─ app/
+│  ├─ main.py
+│  ├─ crawler.py
+│  ├─ detector.py
+│  ├─ dynamic.py
+│  ├─ enrich.py
+│  ├─ storage.py
+│  └─ utils.py
+├─ tests/
+│  └─ test_corpus.py
