@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Technology Detector</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to bottom right, #eff6ff, #e0e7ff);
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px #bfdbfe;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      background: #2563eb;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .error {
+      margin-top: 0.75rem;
+      color: #b45309;
+      background: #fffbeb;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .meta-box {
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
+    .meta-box div:first-child {
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .meta-box div:last-child {
+      font-weight: 600;
+      margin-top: 0.25rem;
+    }
+
+    .tech-category {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .tech-category h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .tech-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #f9fafb;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+
+    .tech-item:hover {
+      background: #f3f4f6;
+    }
+
+    .confidence {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .high { color: #16a34a; background: #dcfce7; }
+    .medium { color: #ca8a04; background: #fef9c3; }
+    .low { color: #ea580c; background: #ffedd5; }
+
+    .note {
+      background: #fef9c3;
+      border: 1px solid #fef08a;
+      color: #78350f;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+    }
+
+    .placeholder {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    .placeholder i {
+      font-size: 3rem;
+      color: #d1d5db;
+    }
+
+    .placeholder h3 {
+      margin-top: 1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .placeholder p {
+      color: #6b7280;
+      font-size: 0.95rem;
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Technology Detector</h1>
+    <p class="subtitle">Discover what technologies websites are built with</p>
+
+    <div class="card">
+      <div class="input-group">
+        <input id="urlInput" type="text" placeholder="Enter website URL (e.g., example.com)" />
+        <button id="detectBtn"><i class="ri-search-line"></i> Detect</button>
+      </div>
+      <div id="errorMsg" class="error" style="display:none;"></div>
+    </div>
+
+    <div id="resultsContainer"></div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('detectBtn');
+    const input = document.getElementById('urlInput');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const errorMsg = document.getElementById('errorMsg');
+
+    btn.addEventListener('click', detectTechnologies);
+    input.addEventListener('keypress', e => { if (e.key === 'Enter') detectTechnologies(); });
+
+    function detectTechnologies() {
+      const url = input.value.trim();
+      if (!url) {
+        errorMsg.textContent = 'Please enter a URL';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      errorMsg.style.display = 'none';
+      resultsContainer.innerHTML = `
+        <div class="card loading">
+          <div class="spinner"></div> Analyzing...
+        </div>
+      `;
+
+      setTimeout(() => {
+        const results = analyzeTechnologies(url);
+        displayResults(results);
+      }, 2000);
+    }
+
+    function analyzeTechnologies(targetUrl) {
+      const domain = targetUrl.replace(/^https?:\/\//, '');
+      return {
+        frameworks: [
+          { name: 'React', version: '18.2.0', category: 'JavaScript Framework', confidence: 'High' },
+          { name: 'Next.js', version: '13.4.0', category: 'React Framework', confidence: 'Medium' }
+        ],
+        cms: [{ name: 'WordPress', version: '6.2', category: 'CMS', confidence: 'Low' }],
+        analytics: [
+          { name: 'Google Analytics', version: 'GA4', category: 'Analytics', confidence: 'High' },
+          { name: 'Google Tag Manager', version: 'Latest', category: 'Tag Manager', confidence: 'High' }
+        ],
+        hosting: [
+          { name: 'Cloudflare', category: 'CDN', confidence: 'High' },
+          { name: 'AWS', category: 'Cloud Hosting', confidence: 'Medium' }
+        ],
+        security: [
+          { name: 'SSL/TLS', version: 'TLS 1.3', category: 'Security', confidence: 'High' },
+          { name: 'HSTS', category: 'Security Header', confidence: 'Medium' }
+        ],
+        libraries: [
+          { name: 'jQuery', version: '3.6.0', category: 'JavaScript Library', confidence: 'Medium' },
+          { name: 'Lodash', version: '4.17.21', category: 'Utility Library', confidence: 'Low' }
+        ],
+        webServer: [{ name: 'Nginx', version: '1.21', category: 'Web Server', confidence: 'High' }],
+        meta: {
+          domain: domain,
+          ssl: true,
+          responsive: true
+        }
+      };
+    }
+
+    function displayResults(results) {
+      const meta = `
+        <div class="card">
+          <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:1rem;">Detection Results</h2>
+          <div class="meta-grid">
+            <div class="meta-box" style="background:#eff6ff;">
+              <div>Domain</div><div>${results.meta.domain}</div>
+            </div>
+            <div class="meta-box" style="background:#dcfce7;">
+              <div>SSL Enabled</div><div style="color:#16a34a;">${results.meta.ssl ? 'Yes' : 'No'}</div>
+            </div>
+            <div class="meta-box" style="background:#ede9fe;">
+              <div>Responsive</div><div style="color:#7c3aed;">${results.meta.responsive ? 'Yes' : 'No'}</div>
+            </div>
+            <div class="meta-box" style="background:#e0e7ff;">
+              <div>Last Checked</div><div style="color:#4338ca;">Just now</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const categories = {
+        frameworks: 'JavaScript Frameworks',
+        cms: 'Content Management System',
+        analytics: 'Analytics & Tracking',
+        hosting: 'Hosting & CDN',
+        security: 'Security',
+        libraries: 'JavaScript Libraries',
+        webServer: 'Web Server'
+      };
+
+      let content = meta;
+
+      for (const [key, techs] of Object.entries(results)) {
+        if (key === 'meta') continue;
+        content += `
+          <div class="card">
+            <div class="tech-category">
+              <i class="ri-code-s-slash-line"></i>
+              <h3>${categories[key]}</h3>
+              <span style="margin-left:auto;font-size:0.875rem;color:#6b7280;">${techs.length} detected</span>
+            </div>
+            ${techs.map(t => `
+              <div class="tech-item">
+                <div>
+                  <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span style="font-weight:600;">${t.name}</span>
+                    ${t.version ? `<span style="font-size:0.875rem;background:white;padding:0.15rem 0.5rem;border-radius:6px;color:#6b7280;">v${t.version}</span>` : ''}
+                  </div>
+                  <div style="font-size:0.875rem;color:#6b7280;">${t.category}</div>
+                </div>
+                <span class="confidence ${t.confidence.toLowerCase()}">${t.confidence}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+
+      content += `
+        <div class="note">
+          <strong>Note:</strong> This is a demo version with simulated results. A full implementation would require server-side processing to bypass CORS limitations and perform deep analysis of HTML, HTTP headers, JavaScript files, CSS, and network requests.
+        </div>
+      `;
+
+      resultsContainer.innerHTML = content;
+    }
+  </script>
+</body>
+</html>
